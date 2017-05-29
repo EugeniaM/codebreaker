@@ -11,7 +11,6 @@ module Codebreaker
       @secret_code = 4.times.map{rand(1..6)}.join
       @marked_guess = ''
       @turns = 10
-      puts @secret_code
     end
 
     def submit_guess(guess)
@@ -24,6 +23,10 @@ module Codebreaker
       @marked_guess.chars.sort.join
     end
 
+    def get_hint
+      @secret_code[rand(0..3)]
+    end
+
     def game_over
       return :won if @marked_guess == '++++'
       return :lost if turns == 0
@@ -34,17 +37,18 @@ module Codebreaker
     private
 
     def get_exact_matches(guess)
-      guess.each_char.with_index do |char, i|
-          @marked_guess += '+' if @secret_code[i] == char
-      end
+      guess_arr = guess.split('')
+      secret_code_arr = @secret_code.split('')
+      exact_match_length = guess_arr.zip(secret_code_arr).select { |guess, secret| guess == secret}.size
+      exact_match_length.times { @marked_guess += '+' }
     end
 
     def get_include_matches(guess)
-      temp_secret_code = @secret_code.clone
-      guess.each_char do |char|
-        temp_secret_code[temp_secret_code.index(char)] = '' if temp_secret_code.include?(char)
+      @secret_code.each_char do |char|
+        guess.slice!(char)
       end
-      (@secret_code.size - @marked_guess.size - temp_secret_code.size).times { @marked_guess += '-' }
+      not_exact_match_length = @secret_code.size - @marked_guess.size - guess.size
+      not_exact_match_length.times { @marked_guess += '-' }
     end
   end
 end

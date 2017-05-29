@@ -7,6 +7,8 @@
 /pkg/
 /spec/reports/
 /tmp/
+scores/**
+
 
 # rspec failure tracking
 .rspec_status
