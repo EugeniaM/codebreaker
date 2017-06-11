@@ -1,3 +1,5 @@
+require 'yaml'
+
 module Codebreaker
   class GameHandler
     attr_reader :player, :game
@@ -26,34 +28,9 @@ module Codebreaker
       exit
     end
 
-    def confirm_game_start
-      puts ask_start_game
-      decision = get_decision
-      handle_decision(decision)
-    end
-
     def start_game
       game.start
       make_moves
-    end
-
-    def make_moves
-      while true
-        puts ask_make_move
-        guess_code = get_guess
-        unless guess_code
-          puts "You've entered not allowed number! It should contain 4 digits from 1 to 6."
-          make_moves
-          return
-        end
-        marked_guess = game.submit_guess(guess_code)
-        puts marked_guess
-        if game.game_over
-          puts game_over_message
-          confirm_game_start
-          return
-        end
-      end
     end
 
     def ask_make_move
@@ -61,8 +38,7 @@ module Codebreaker
     end
 
     def get_guess(code = gets.chomp)
-      return code if code.size == 4 && code.match(/[1-6]{4}/)
-      # hint case
+      return code if code.size == 4 && code.match(/[1-6]{4}/) || code == 'hint'
       false
     end
 
@@ -71,10 +47,56 @@ module Codebreaker
       return "#{player} lost! The secret code was #{game.instance_variable_get(:@secret_code)}" if game.game_over == :lost
     end
 
+    def save_score
+      if File.exists? ("./scores/scores.yml")
+        scores = YAML.load(File.open("./scores/scores.yml"))
+      else
+        scores = []
+        File.new("./scores/scores.yml", "w")
+      end
+
+      scores.push({name: player, turns: (10 - game.turns), status: game.game_over, date: Time.now.strftime("%d/%m/%Y %H:%M")})
+      File.open("./scores/scores.yml", "w") {|f| f.write(scores.to_yaml) }
+    end
+
     def play
       puts "Please enter your name"
       get_player
       confirm_game_start
+    end
+
+    def confirm_game_start
+      puts ask_start_game
+      decision = get_decision
+      handle_decision(decision)
+    end
+
+    def make_moves
+      while true
+        puts '*****************************'
+        puts ask_make_move
+        puts '*****************************'
+        guess_code = get_guess
+        unless guess_code
+          puts "You've entered not allowed number! It should contain 4 digits from 1 to 6."
+          make_moves
+          return
+        end
+        if guess_code == 'hint'
+          hint = game.get_hint
+          puts "The secret code defenitely contains #{hint}. Try to guess how many times and where it stands ;)"
+          make_moves
+          return
+        end
+        marked_guess = game.submit_guess(guess_code)
+        puts marked_guess
+        if game.game_over
+          puts game_over_message
+          save_score
+          confirm_game_start
+          return
+        end
+      end
     end
   end
 end

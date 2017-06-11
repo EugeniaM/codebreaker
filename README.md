@@ -1,8 +1,12 @@
 # Codebreaker
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/codebreaker`. To experiment with that code, run `bin/console` for an interactive prompt.
+Codebreaker is a logic game in which a code-breaker tries to break a secret code created by a code-maker. The code-maker, which will be played by the application we’re going to write, creates a secret code of four numbers between 1 and 6.
 
-TODO: Delete this and the text above, and describe your gem
+The code-breaker then gets some number of chances to break the code. In each turn, the code-breaker makes a guess of four numbers. The code-maker then marks the guess with up to four + and - signs.
+
+A + indicates an exact match: one of the numbers in the guess is the same as one of the numbers in the secret code and in the same position.
+
+A - indicates a number match: one of the numbers in the guess is the same as one of the numbers in the secret code but in a different position.
 
 ## Installation
 
@@ -22,7 +26,11 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+To run the game navigate to the top level directory and run the command
+
+```
+ruby runner/runner_game.rb
+```
 
 ## Development
 

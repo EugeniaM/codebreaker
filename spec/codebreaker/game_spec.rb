@@ -69,6 +69,15 @@ module Codebreaker
       end
     end
 
+    context '#get_hint' do
+      it "returns 3 if secret_code is '1234' and randomly generated number is 2" do
+        allow_any_instance_of(Kernel).to receive(:rand).with(0..3).and_return 2
+        game.instance_variable_set(:@secret_code, '1234')
+        result = game.get_hint
+        expect(result).to eq '3'
+      end
+    end
+
     context '#get_exact_matches' do
       it "sets marked_guess to '++' if secret_code is '1234' and guess_code is '1554'" do
         game.instance_variable_set(:@secret_code, '1234')
