@@ -55,7 +55,7 @@ module Codebreaker
         File.new("./scores/scores.yml", "w")
       end
 
-      scores.push({name: player, turns: (10 - game.turns), status: game.game_over})
+      scores.push({name: player, turns: (10 - game.turns), status: game.game_over, date: Time.now.strftime("%d/%m/%Y %H:%M")})
       File.open("./scores/scores.yml", "w") {|f| f.write(scores.to_yaml) }
     end
 
