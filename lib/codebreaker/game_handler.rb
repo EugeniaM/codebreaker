@@ -25,15 +25,15 @@ module Codebreaker
     def make_moves
       loop do
         guess_code = invite_make_guess
-        unless guess_code
+        case guess_code
+        when false
           handle_wrong_guess
           break
-        end
-        if guess_code == 'hint'
+        when 'hint'
           handle_hint
           break
+        else display_marked_guess(guess_code)
         end
-        display_marked_guess(guess_code)
         if game.game_over
           handle_game_over
           break
