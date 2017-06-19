@@ -34,10 +34,7 @@ module Codebreaker
           break
         else display_marked_guess(guess_code)
         end
-        if game.game_over
-          handle_game_over
-          break
-        end
+        return handle_game_over if game.game_over
       end
     end
 
