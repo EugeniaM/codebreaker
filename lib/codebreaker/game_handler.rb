@@ -1,11 +1,70 @@
 require 'yaml'
+require_relative './validator.rb'
 
 module Codebreaker
   class GameHandler
+    include Validator
     attr_reader :player, :game
 
     def initialize(game = Game.new)
       @game = game
+    end
+    
+    def play
+      puts "Please enter your name"
+      get_player
+      confirm_game_start
+    end
+
+    def confirm_game_start
+      puts ask_start_game
+      decision = get_decision
+      handle_decision(decision)
+    end
+
+    def make_moves
+      loop do
+        guess_code = invite_make_guess
+        case guess_code
+        when false
+          handle_wrong_guess
+          break
+        when 'hint'
+          handle_hint
+          break
+        else display_marked_guess(guess_code)
+        end
+        return handle_game_over if game.game_over
+      end
+    end
+
+    def invite_make_guess
+      puts '*****************************'
+      puts ask_make_move
+      puts '*****************************'
+      get_guess
+    end
+
+    def handle_wrong_guess
+      puts "You've entered not allowed number! It should contain 4 digits from 1 to 6."
+      make_moves
+    end
+
+    def handle_hint
+      hint = game.get_hint
+      puts "The secret code defenitely contains #{hint}. Try to guess how many times and where it stands ;)"
+      make_moves
+    end
+
+    def display_marked_guess(guess_code)
+      marked_guess = game.submit_guess(guess_code)
+      puts marked_guess
+    end
+
+    def handle_game_over
+      puts game_over_message
+      save_score
+      confirm_game_start
     end
 
     def get_player(name = gets.chomp)
@@ -23,7 +82,7 @@ module Codebreaker
     end
 
     def handle_decision(decision)
-      return confirm_game_start if decision == nil
+      return confirm_game_start if decision.nil?
       return start_game if decision
       exit
     end
@@ -38,13 +97,12 @@ module Codebreaker
     end
 
     def get_guess(code = gets.chomp)
-      return code if code.size == 4 && code.match(/[1-6]{4}/) || code == 'hint'
+      return code if validate_guess(code)
       false
     end
 
     def game_over_message
-      return "#{player} won! The secret code was #{game.instance_variable_get(:@secret_code)}" if game.game_over == :won
-      return "#{player} lost! The secret code was #{game.instance_variable_get(:@secret_code)}" if game.game_over == :lost
+      "#{player} #{game.game_over}! The secret code was #{game.instance_variable_get(:@secret_code)}"
     end
 
     def save_score
@@ -57,46 +115,6 @@ module Codebreaker
 
       scores.push({name: player, turns: (10 - game.turns), status: game.game_over, date: Time.now.strftime("%d/%m/%Y %H:%M")})
       File.open("./scores/scores.yml", "w") {|f| f.write(scores.to_yaml) }
-    end
-
-    def play
-      puts "Please enter your name"
-      get_player
-      confirm_game_start
-    end
-
-    def confirm_game_start
-      puts ask_start_game
-      decision = get_decision
-      handle_decision(decision)
-    end
-
-    def make_moves
-      while true
-        puts '*****************************'
-        puts ask_make_move
-        puts '*****************************'
-        guess_code = get_guess
-        unless guess_code
-          puts "You've entered not allowed number! It should contain 4 digits from 1 to 6."
-          make_moves
-          return
-        end
-        if guess_code == 'hint'
-          hint = game.get_hint
-          puts "The secret code defenitely contains #{hint}. Try to guess how many times and where it stands ;)"
-          make_moves
-          return
-        end
-        marked_guess = game.submit_guess(guess_code)
-        puts marked_guess
-        if game.game_over
-          puts game_over_message
-          save_score
-          confirm_game_start
-          return
-        end
-      end
     end
   end
 end

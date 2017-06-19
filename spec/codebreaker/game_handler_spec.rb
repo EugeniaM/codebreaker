@@ -2,7 +2,7 @@ require_relative '../spec_helper'
 
 module Codebreaker
   RSpec.describe GameHandler do
-    let(:game_handler) {GameHandler.new}
+    subject(:game_handler) {GameHandler.new}
 
     context '#get_player' do
       it "sets current player's name" do
@@ -22,11 +22,11 @@ module Codebreaker
     context '#get_decision' do
       it "returns 'true' if decision is 'y'" do
         decision = game_handler.get_decision('y')
-        expect(decision).to eq true
+        expect(decision).to be true
       end
       it "returns 'false' if decision is 'n'" do
         decision = game_handler.get_decision('n')
-        expect(decision).to eq false
+        expect(decision).to be false
       end
       it "returns 'nil' if decision is not 'y' or 'n'" do
         decision = game_handler.get_decision('other decision')
@@ -71,7 +71,7 @@ module Codebreaker
       end
     end
 
-    context 'get_guess' do
+    context '#get_guess' do
       it "should return guess code if it matches 4 digits each ranging from 1 to 6" do
         guess_code = game_handler.get_guess('1234')
         expect(guess_code).to eq('1234')

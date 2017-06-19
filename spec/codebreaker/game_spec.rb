@@ -1,20 +1,13 @@
 require_relative '../spec_helper'
+require_relative '../../test_data/test_data'
 
 module Codebreaker
   RSpec.describe Game do
-    let(:game) {Game.new}
+    subject(:game) {Game.new}
 
     context '#initialize' do
       it "sets secret_code to empty string" do
         expect(game.instance_variable_get(:@secret_code)).to be_empty
-      end
-
-      it "sets default turns number to 10" do
-        expect(game.instance_variable_get(:@turns)).to eq 10
-      end
-
-      it "sets marked_guess to empty string" do
-        expect(game.instance_variable_get(:@marked_guess)).to be_empty
       end
     end
     
@@ -51,6 +44,7 @@ module Codebreaker
       before do
         game.instance_variable_set(:@secret_code, '1234')
         game.instance_variable_set(:@turns, 10)
+        game.instance_variable_set(:@marked_guess, '')
       end
 
       it "should reduce number of turns by 1" do
@@ -58,9 +52,13 @@ module Codebreaker
         expect(game.turns).to eq(9)
       end
 
-      it "returns '+--' if guess_code is '3245' and secret_code is '1234'" do
-        marked_guess = game.submit_guess('3245')
-        expect(marked_guess).to eq('+--')
+      data = CodebreakerData::data
+      data.each do |dataSet|
+        it "returns #{dataSet[2]} if guess_code is #{dataSet[1]} and secret_code is #{dataSet[0]}" do
+          game.instance_variable_set(:@secret_code, dataSet[0])
+          marked_guess = game.submit_guess(dataSet[1])
+          expect(marked_guess).to eq(dataSet[2])
+        end
       end
 
       it "returns 'NO MATCH' if there are no matches between guess_code and secret_code" do
@@ -75,22 +73,6 @@ module Codebreaker
         game.instance_variable_set(:@secret_code, '1234')
         result = game.get_hint
         expect(result).to eq '3'
-      end
-    end
-
-    context '#get_exact_matches' do
-      it "sets marked_guess to '++' if secret_code is '1234' and guess_code is '1554'" do
-        game.instance_variable_set(:@secret_code, '1234')
-        game.send(:get_exact_matches, '1554')
-        expect(game.instance_variable_get(:@marked_guess)).to eq('++')
-      end
-    end
-
-    context '#get_include_matches' do
-      it "sets marked_guess to '--' if secret_code is '1234' and guess_code is '5162'" do
-        game.instance_variable_set(:@secret_code, '1234')
-        game.send(:get_include_matches, '5162')
-        expect(game.instance_variable_get(:@marked_guess)).to eq('--')
       end
     end
 

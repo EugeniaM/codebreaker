@@ -1,24 +1,20 @@
 module Codebreaker
   class Game
     attr_reader :turns
+    ATTEMPTS = 10
     def initialize
       @secret_code = ''
-      @turns = 10
-      @marked_guess = ''
     end
 
     def start
       @secret_code = 4.times.map{rand(1..6)}.join
       @marked_guess = ''
-      @turns = 10
+      @turns = ATTEMPTS
     end
 
     def submit_guess(guess)
       @turns -= 1
-
-      get_exact_matches(guess)
-      get_include_matches(guess)
-
+      get_exact_matches(guess.split(''), @secret_code.split(''))
       return 'NO MATCH' if @marked_guess == ''
       @marked_guess.chars.sort.join
     end
@@ -36,19 +32,19 @@ module Codebreaker
 
     private
 
-    def get_exact_matches(guess)
-      guess_arr = guess.split('')
-      secret_code_arr = @secret_code.split('')
-      exact_match_length = guess_arr.zip(secret_code_arr).select { |guess, secret| guess == secret}.size
-      exact_match_length.times { @marked_guess += '+' }
+    def get_exact_matches(guess_arr, secret_code_arr)
+      return @marked_guess = '++++' if guess_arr == secret_code_arr
+      excluded_exact_match = guess_arr.zip(secret_code_arr).select { |guess, secret| guess != secret}.transpose
+      @marked_guess = '+' * (4 - excluded_exact_match[0].size)
+      get_include_matches(excluded_exact_match[0], excluded_exact_match[1])
     end
 
-    def get_include_matches(guess)
-      @secret_code.each_char do |char|
-        guess.slice!(char)
+    def get_include_matches(guess_arr, secret_code_arr)
+      secret_code_arr.each do |val|
+        next if !guess_arr.include?(val) 
+        guess_arr.delete_at(guess_arr.index(val))
+        @marked_guess += '-'
       end
-      not_exact_match_length = @secret_code.size - @marked_guess.size - guess.size
-      not_exact_match_length.times { @marked_guess += '-' }
     end
   end
 end
